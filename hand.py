@@ -16,7 +16,7 @@ def isPointsClose(two_points, axis):
         points_distance = int((two_points[0].y - two_points[1].y) * 100)
     return (points_distance >= -3 and points_distance <= 3)
 
-def moveCursor(move_cursor_point, left_click_points, right_click_points):
+def moveCursor(move_cursor_point, left_click_points, right_click_points, double_click_points):
     sensitive = 1.5
     cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
     cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
@@ -27,8 +27,10 @@ def moveCursor(move_cursor_point, left_click_points, right_click_points):
         pyautogui.click(button='left')
     if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'): # they are so close
         pyautogui.click(button='right')
+    if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'): # they are so close
+        pyautogui.click(button='left', clicks=2)
 
-    pyautogui.sleep(.5)
+    pyautogui.sleep(1)
 
 def drawLandmarks(landmarks_to_draw):
     for landmark_id, landmark in enumerate(landmarks_to_draw):
@@ -59,19 +61,25 @@ while True:
 
     if multi_hand_landmarks:
         hand_landmarks = multi_hand_landmarks[0].landmark
-        landmarks_to_draw = [hand_landmarks[5], hand_landmarks[4], hand_landmarks[12], hand_landmarks[16]]
+        landmarks_to_draw = [
+            hand_landmarks[5], hand_landmarks[4], 
+            hand_landmarks[12], hand_landmarks[16],
+            hand_landmarks[20]]
 
         cursor_coordinates = []
         move_cursor_point = hand_landmarks[5]
         left_click_points = [hand_landmarks[4], hand_landmarks[12]]
         right_click_points = [hand_landmarks[4], hand_landmarks[16]]
+        double_click_points = [hand_landmarks[4], hand_landmarks[20]]
 
         # draw eye points
         draw_landmarks = threading.Thread(target=drawLandmarks, args=(landmarks_to_draw,))
         draw_landmarks.start()
 
         # control cursor
-        control_cursor = threading.Thread(target=moveCursor, args=(move_cursor_point, left_click_points, right_click_points,))
+        control_cursor = threading.Thread(target=moveCursor, args=(
+            move_cursor_point, left_click_points, right_click_points, double_click_points,)
+        )
         control_cursor.start()
         
 
