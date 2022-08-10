@@ -55,12 +55,12 @@ while True:
     if multi_hand_landmarks:
         hand_landmarks = multi_hand_landmarks[0].landmark
         landmarks_to_draw = [
-            hand_landmarks[8], hand_landmarks[4], 
+            hand_landmarks[5], hand_landmarks[4], 
             hand_landmarks[12], hand_landmarks[16],
             hand_landmarks[20]]
 
         cursor_coordinates = []
-        move_cursor_point = hand_landmarks[8]
+        move_cursor_point = hand_landmarks[5]
         left_click_points = [hand_landmarks[4], hand_landmarks[12]]
         right_click_points = [hand_landmarks[4], hand_landmarks[16]]
         double_click_points = [hand_landmarks[4], hand_landmarks[20]]
