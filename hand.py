@@ -17,29 +17,18 @@ def isPointsClose(two_points, axis):
         points_distance = int((two_points[0].y - two_points[1].y) * 100)
     return (points_distance >= -3 and points_distance <= 3)
 
-def clickEvents(move_cursor_point, left_click_points, right_click_points, double_click_points):
-    if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'): # they are so close
-        mouse.click('left')
-    if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'): # they are so close
-        mouse.click('right')
-    if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'): # they are so close
-        pyautogui.click(button='left', clicks=2)
+def click(button='left', count=None):
+    if count != 1:
+        mouse.click(button)
+    else:
+        mouse.click(button, clicks=count)
 
-def drawLandmarks(landmarks_to_draw):
-    for landmark_id, landmark in enumerate(landmarks_to_draw):
-        # draw on particular landmark
-        x = int(landmark.x * frame_w)
-        y = int(landmark.y * frame_h)
-        draw_coordinates = (x,y)
-
-        if landmark_id == 0:
-            rgb = (0, 0, 255)
-            size = 7
-            cv2.circle(frame, draw_coordinates, size, rgb, cv2.FILLED)
-        else:
-            rgb = (0, 255, 255)
-            size = 10
-            cv2.circle(frame, draw_coordinates, size, rgb)
+def moveCursor(move_cursor_point):
+    sensitive = 1.5
+    cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
+    cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
+    cursor_coordinates = [cursor_x, cursor_y]
+    mouse.move(cursor_x, cursor_y)
 
 while True:
     _, frame = cam.read()
@@ -66,19 +55,32 @@ while True:
         double_click_points = [hand_landmarks[4], hand_landmarks[20]]
 
         # move cursor
-        sensitive = 1.5
-        cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
-        cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
-        cursor_coordinates = [cursor_x, cursor_y]
-        mouse.move(cursor_x, cursor_y)
+        threading.Thread(target=moveCursor, args=(move_cursor_point,)).start()
         
         # draw landmarks
-        draw_landmarks = threading.Thread(target=drawLandmarks, args=(landmarks_to_draw,))
-        draw_landmarks.start()
+        for landmark_id, landmark in enumerate(landmarks_to_draw):
+            # draw on particular landmark
+            x = int(landmark.x * frame_w)
+            y = int(landmark.y * frame_h)
+            draw_coordinates = (x,y)
+
+            if landmark_id == 0:
+                rgb = (0, 0, 255)
+                size = 7
+                threading.Thread(target=cv2.circle, args=(frame, draw_coordinates, size, rgb, cv2.FILLED,)).start()
+
+            else:
+                rgb = (0, 255, 255)
+                size = 10
+                threading.Thread(target=cv2.circle, args=(frame, draw_coordinates, size, rgb,)).start()
 
         # click events
-        click_events = threading.Thread(target=clickEvents, args=(move_cursor_point, left_click_points, right_click_points, double_click_points,))
-        click_events.start()
+        if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'): # they are so close
+            threading.Thread(target=click, args=('left',)).start()
+        if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'): # they are so close
+            threading.Thread(target=click, args=('right',)).start()
+        if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'): # they are so close
+            threading.Thread(target=click, args=('left',2,)).start()
 
         
     # create window
