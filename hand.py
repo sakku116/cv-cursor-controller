@@ -46,13 +46,14 @@ while True:
         landmarks_to_draw = [
             hand_landmarks[5], hand_landmarks[4], 
             hand_landmarks[12], hand_landmarks[16],
-            hand_landmarks[20]]
+            hand_landmarks[20]
+        ] # base index, thumb tip, middle tip, ring tip, pinky tip
 
-        cursor_coordinates = []
-        move_cursor_point = hand_landmarks[5]
-        left_click_points = [hand_landmarks[4], hand_landmarks[12]]
-        right_click_points = [hand_landmarks[4], hand_landmarks[16]]
-        double_click_points = [hand_landmarks[4], hand_landmarks[20]]
+        # finger points
+        move_cursor_point = hand_landmarks[5] # base index finger
+        left_click_points = [hand_landmarks[4], hand_landmarks[12]] # thumb tip, middle tip
+        right_click_points = [hand_landmarks[4], hand_landmarks[16]] # thumb tip, ring tip
+        double_click_points = [hand_landmarks[4], hand_landmarks[20]] # thumb tip, pinky tip
 
         # move cursor
         threading.Thread(target=moveCursor, args=(move_cursor_point,)).start()
@@ -60,11 +61,12 @@ while True:
         # draw landmarks
         for landmark_id, landmark in enumerate(landmarks_to_draw):
             # draw on particular landmark
-            x = int(landmark.x * frame_w)
-            y = int(landmark.y * frame_h)
-            draw_coordinates = (x,y)
+            draw_coordinates = (
+                int(landmark.x * frame_w), # x
+                int(landmark.y * frame_h) # y
+            )
 
-            if landmark_id == 0:
+            if landmark_id == 0: # pointer
                 rgb = (0, 0, 255)
                 size = 7
                 threading.Thread(target=cv2.circle, args=(frame, draw_coordinates, size, rgb, cv2.FILLED,)).start()
@@ -75,11 +77,11 @@ while True:
                 threading.Thread(target=cv2.circle, args=(frame, draw_coordinates, size, rgb,)).start()
 
         # click events
-        if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'): # they are so close
+        if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
             threading.Thread(target=click, args=('left',)).start()
-        if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'): # they are so close
+        if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'):
             threading.Thread(target=click, args=('right',)).start()
-        if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'): # they are so close
+        if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'):
             threading.Thread(target=click, args=('left',2,)).start()
 
         
