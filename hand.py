@@ -35,7 +35,7 @@ while True:
     frame = cv2.flip(frame, 1)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    mp_process = mp_hands.process(frame)
+    mp_process = mp_hands.process(rgb_frame)
     multi_hand_landmarks = mp_process.multi_hand_landmarks
 
     # get size of the frame
@@ -57,6 +57,7 @@ while True:
 
         # move cursor
         threading.Thread(target=moveCursor, args=(move_cursor_point,)).start()
+        # moveCursor(move_cursor_point)
         
         # draw landmarks
         for landmark_id, landmark in enumerate(landmarks_to_draw):
@@ -79,11 +80,13 @@ while True:
         # click events
         if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
             threading.Thread(target=click, args=('left',)).start()
+            # click('left')
         if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'):
             threading.Thread(target=click, args=('right',)).start()
+            # click('right')
         if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'):
             threading.Thread(target=click, args=('left',2,)).start()
-
+            # click('left', 2)
         
     # create window
     cv2.imshow('Eye Controlled Mouse', frame)
