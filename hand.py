@@ -19,15 +19,14 @@ def isPointsClose(two_points, axis):
 
 def click(button='left', count=None):
     if count != 1:
-        pyautogui.click(button=button)
+        mouse.click(button=button)
     else:
-        pyautogui.click(button=button, clicks=count)
-    pytautogui.sleep(1)
+        mouse.click(button=button, clicks=count)
 
 def moveCursor(move_cursor_point):
     sensitive = 1.5
     screen_w = SCREEN_W * sensitive
-    screen_h = SCREEN_h * sensitive
+    screen_h = SCREEN_H * sensitive
 
     """
     since the screen size is multiplied with sensitive, that mean...
@@ -41,8 +40,8 @@ def moveCursor(move_cursor_point):
     screen_w_offset = SCREEN_W / (sensitive * 2)
     screen_h_offset = SCREEN_H / (sensitive * 2)
     
-    cursor_x = (move_cursor_point.x * screen_w) - screen_w_offset
-    cursor_y = (move_cursor_point.y * screen_h) - screen_h_offset
+    cursor_x = int((move_cursor_point.x * screen_w) - screen_w_offset)
+    cursor_y = int((move_cursor_point.y * screen_h) - screen_h_offset)
     cursor_coordinates = [cursor_x, cursor_y]
 
     pyautogui.moveTo(cursor_x, cursor_y)
@@ -51,7 +50,7 @@ def drag(move_cursor_point, button="left"):
     sensitive = 1.5
     
     screen_w = SCREEN_W * sensitive
-    screen_h = SCREEN_h * sensitive
+    screen_h = SCREEN_H * sensitive
 
     screen_w_offset = SCREEN_W / (sensitive * 2)
     screen_h_offset = SCREEN_H / (sensitive * 2)
@@ -78,17 +77,17 @@ while True:
 
         # finger points
         tumb_tip = hand_landmarks[4]
-        index_tip = hand_landmarks[8]
+        index_base = hand_landmarks[5]
         middle_tip = hand_landmarks[12]
         ring_tip = hand_landmarks[16]
         pinky_tip = hand_landmarks[20]
 
         landmarks_to_draw = [
-            index_tip, tumb_tip, middle_tip, ring_tip, pinky_tip
+            index_base, tumb_tip, middle_tip, ring_tip, pinky_tip
         ]        
 
         # finger index for command
-        move_cursor_point = index_tip
+        move_cursor_point = index_base
         left_click_points = [tumb_tip, middle_tip]
         right_click_points = [tumb_tip, ring_tip]
         double_click_points = [tumb_tip, pinky_tip]
@@ -127,12 +126,15 @@ while True:
             threading.Thread(target=drag, args=(move_cursor_point, "left",)).start()
         elif isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
             threading.Thread(target=click, args=('left',)).start()
+            # mouse.wait(1)
             # click('left')
         elif isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'):
             threading.Thread(target=click, args=('right',)).start()
+            # mouse.wait(1)
             # click('right')
         elif isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'):
             threading.Thread(target=click, args=('left',2,)).start()
+            # mouse.wait(1)
             # click('left', 2)
         
     # create window
