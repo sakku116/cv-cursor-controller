@@ -22,13 +22,21 @@ def click(button='left', count=None):
         mouse.click(button)
     else:
         mouse.click(button, clicks=count)
+    mouse.wait(2)
 
 def moveCursor(move_cursor_point):
     sensitive = 1.5
     cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
     cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
     cursor_coordinates = [cursor_x, cursor_y]
-    mouse.move(cursor_x, cursor_y)
+    pyautogui.moveTo(cursor_x, cursor_y)
+
+def drag(move_cursor_point, button="left"):
+    sensitive = 1.5
+    cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
+    cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
+    cursor_coordinates = [cursor_x, cursor_y]
+    pyautogui.dragTo(cursor_x, cursor_y)
 
 while True:
     _, frame = cam.read()
@@ -43,17 +51,28 @@ while True:
 
     if multi_hand_landmarks:
         hand_landmarks = multi_hand_landmarks[0].landmark
-        landmarks_to_draw = [
-            hand_landmarks[5], hand_landmarks[4], 
-            hand_landmarks[12], hand_landmarks[16],
-            hand_landmarks[20]
-        ] # base index, thumb tip, middle tip, ring tip, pinky tip
 
         # finger points
-        move_cursor_point = hand_landmarks[5] # base index finger
-        left_click_points = [hand_landmarks[4], hand_landmarks[12]] # thumb tip, middle tip
-        right_click_points = [hand_landmarks[4], hand_landmarks[16]] # thumb tip, ring tip
-        double_click_points = [hand_landmarks[4], hand_landmarks[20]] # thumb tip, pinky tip
+        tumb_tip = hand_landmarks[4]
+        index_tip = hand_landmarks[8]
+        middle_tip = hand_landmarks[12]
+        ring_tip = hand_landmarks[16]
+        pinky_tip = hand_landmarks[20]
+
+        landmarks_to_draw = [
+            index_tip, tumb_tip, middle_tip, ring_tip, pinky_tip
+        ]        
+
+        # finger index for command
+        move_cursor_point = index_tip
+        left_click_points = [tumb_tip, middle_tip]
+        right_click_points = [tumb_tip, ring_tip]
+        double_click_points = [tumb_tip, pinky_tip]
+        drag_points = [
+            [tumb_tip, middle_tip],
+            [tumb_tip, ring_tip],
+            [tumb_tip, pinky_tip],
+        ]
 
         # move cursor
         threading.Thread(target=moveCursor, args=(move_cursor_point,)).start()
@@ -77,14 +96,18 @@ while True:
                 size = 10
                 threading.Thread(target=cv2.circle, args=(frame, draw_coordinates, size, rgb,)).start()
 
+
         # click events
-        if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
+        if (isPointsClose(drag_points[0], 'x') and isPointsClose(drag_points[1], 'x') and isPointsClose(drag_points[2], 'x')
+            and isPointsClose(drag_points[0], 'y') and isPointsClose(drag_points[1], 'y') and isPointsClose(drag_points[2], 'y')):
+            threading.Thread(target=drag, args=(move_cursor_point, "left",)).start()
+        elif isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
             threading.Thread(target=click, args=('left',)).start()
             # click('left')
-        if isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'):
+        elif isPointsClose(right_click_points, axis='x') and isPointsClose(right_click_points, axis='y'):
             threading.Thread(target=click, args=('right',)).start()
             # click('right')
-        if isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'):
+        elif isPointsClose(double_click_points, axis='x') and isPointsClose(double_click_points, axis='y'):
             threading.Thread(target=click, args=('left',2,)).start()
             # click('left', 2)
         
