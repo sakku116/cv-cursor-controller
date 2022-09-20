@@ -7,7 +7,7 @@ import threading
 # initialize
 cam = cv2.VideoCapture(0)
 mp_hands = mp.solutions.hands.Hands(max_num_hands=1)
-screen_w, screen_h = pyautogui.size()
+SCREEN_W, SCREEN_H = pyautogui.size()
 pyautogui.FAILSAFE = False
 
 def isPointsClose(two_points, axis):
@@ -19,23 +19,47 @@ def isPointsClose(two_points, axis):
 
 def click(button='left', count=None):
     if count != 1:
-        mouse.click(button)
+        pyautogui.click(button=button)
     else:
-        mouse.click(button, clicks=count)
-    mouse.wait(2)
+        pyautogui.click(button=button, clicks=count)
+    pytautogui.sleep(1)
 
 def moveCursor(move_cursor_point):
     sensitive = 1.5
-    cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
-    cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
+    screen_w = SCREEN_W * sensitive
+    screen_h = SCREEN_h * sensitive
+
+    """
+    since the screen size is multiplied with sensitive, that mean...
+    to make the pointer reach the top right of screen display, 
+    computer vision does not need to to reach top right of camera frame.
+    so there is a unused spaces in top right of camera frame, since 0 axis is on top right.
+
+    so the coordinates need to be reduced to center 
+    """
+
+    screen_w_offset = SCREEN_W / (sensitive * 2)
+    screen_h_offset = SCREEN_H / (sensitive * 2)
+    
+    cursor_x = (move_cursor_point.x * screen_w) - screen_w_offset
+    cursor_y = (move_cursor_point.y * screen_h) - screen_h_offset
     cursor_coordinates = [cursor_x, cursor_y]
+
     pyautogui.moveTo(cursor_x, cursor_y)
 
 def drag(move_cursor_point, button="left"):
     sensitive = 1.5
-    cursor_x = ((move_cursor_point.x) * (screen_w * sensitive)) - (screen_w / 3)
-    cursor_y = ((move_cursor_point.y) * (screen_h * sensitive)) - (screen_h / 3)
+    
+    screen_w = SCREEN_W * sensitive
+    screen_h = SCREEN_h * sensitive
+
+    screen_w_offset = SCREEN_W / (sensitive * 2)
+    screen_h_offset = SCREEN_H / (sensitive * 2)
+    
+    cursor_x = (move_cursor_point.x * screen_w) - screen_w_offset
+    cursor_y = (move_cursor_point.y * screen_h) - screen_h_offset
     cursor_coordinates = [cursor_x, cursor_y]
+
     pyautogui.dragTo(cursor_x, cursor_y)
 
 while True:
