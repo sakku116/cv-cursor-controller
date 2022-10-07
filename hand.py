@@ -30,31 +30,31 @@ def moveCursor(move_cursor_point):
 
     """
     since the screen size is multiplied with sensitive, that mean...
-    to make the pointer reach the top right of screen display, 
+    to make the pointer reach the top right of screen display,
     computer vision does not need to to reach top right of camera frame.
     so there is a unused spaces in top right of camera frame, since 0 axis is on top right.
 
-    so the coordinates need to be reduced to center 
+    so the coordinates need to be reduced to center
     """
 
     screen_w_offset = SCREEN_W / (sensitive * 2)
     screen_h_offset = SCREEN_H / (sensitive * 2)
-    
-    cursor_x = int((move_cursor_point.x * screen_w) - screen_w_offset)
-    cursor_y = int((move_cursor_point.y * screen_h) - screen_h_offset)
+
+    cursor_x = ((move_cursor_point.x * screen_w) - screen_w_offset)
+    cursor_y = ((move_cursor_point.y * screen_h) - screen_h_offset)
     cursor_coordinates = [cursor_x, cursor_y]
 
     pyautogui.moveTo(cursor_x, cursor_y)
 
 def drag(move_cursor_point, button="left"):
     sensitive = 1.5
-    
+
     screen_w = SCREEN_W * sensitive
     screen_h = SCREEN_H * sensitive
 
     screen_w_offset = SCREEN_W / (sensitive * 2)
     screen_h_offset = SCREEN_H / (sensitive * 2)
-    
+
     cursor_x = (move_cursor_point.x * screen_w) - screen_w_offset
     cursor_y = (move_cursor_point.y * screen_h) - screen_h_offset
     cursor_coordinates = [cursor_x, cursor_y]
@@ -84,7 +84,7 @@ while True:
 
         landmarks_to_draw = [
             index_base, tumb_tip, middle_tip, ring_tip, pinky_tip
-        ]        
+        ]
 
         # finger index for command
         move_cursor_point = index_base
@@ -100,7 +100,7 @@ while True:
         # move cursor
         threading.Thread(target=moveCursor, args=(move_cursor_point,)).start()
         # moveCursor(move_cursor_point)
-        
+
         # draw landmarks
         for landmark_id, landmark in enumerate(landmarks_to_draw):
             # draw on particular landmark
@@ -121,10 +121,10 @@ while True:
 
 
         # click events
-        if (isPointsClose(drag_points[0], 'x') and isPointsClose(drag_points[1], 'x') and isPointsClose(drag_points[2], 'x')
-            and isPointsClose(drag_points[0], 'y') and isPointsClose(drag_points[1], 'y') and isPointsClose(drag_points[2], 'y')):
-            threading.Thread(target=drag, args=(move_cursor_point, "left",)).start()
-        elif isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
+        # if (isPointsClose(drag_points[0], 'x') and isPointsClose(drag_points[1], 'x') and isPointsClose(drag_points[2], 'x')
+        #     and isPointsClose(drag_points[0], 'y') and isPointsClose(drag_points[1], 'y') and isPointsClose(drag_points[2], 'y')):
+        #     threading.Thread(target=drag, args=(move_cursor_point, "left",)).start()
+        if isPointsClose(left_click_points, axis='x') and isPointsClose(left_click_points, axis='y'):
             threading.Thread(target=click, args=('left',)).start()
             # mouse.wait(1)
             # click('left')
@@ -136,7 +136,7 @@ while True:
             threading.Thread(target=click, args=('left',2,)).start()
             # mouse.wait(1)
             # click('left', 2)
-        
+
     # create window
     cv2.imshow('Eye Controlled Mouse', frame)
     cv2.waitKey(1)
